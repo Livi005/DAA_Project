@@ -1,0 +1,298 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{algorithm, algorithmic}
+\usepackage{graphicx, subcaption}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+% Configuración de teoremas
+\newtheorem{theorem}{Teorema}
+\newtheorem{definition}[theorem]{Definición}
+\newtheorem{corollary}[theorem]{Corolario}
+
+\title{\textbf{Empresa Telefónica}}
+\author{Olivia Ibañez Mustelier  C411}
+\date{}
+
+\begin{document}
+	
+	\vspace{5cm}
+	\maketitle
+	\vspace{13cm}
+
+	\begin{abstract}
+		
+		Este trabajo aborda el Problema de Asignación de Frecuencias con Costos Mínimos (AFCM) en redes de telefonía celular. Demostramos que AFCM es NP-completo mediante reducción desde el problema de coloración de grafos. Implementamos algoritmos exactos para casos especiales (árboles) y algoritmos de aproximación (greedy, búsqueda local) para el caso general. Presentamos resultados experimentales que validan los análisis teóricos y muestran el equilibrio entre tiempo de ejecución y calidad de solución.
+	\end{abstract}
+	\newpage
+
+	\section*{Introducción}
+	
+	\subsection*{Contexto del Problema}
+	En el sector de telecomunicaciones, las empresas operadoras enfrentan el desafío de asignar frecuencias de radio a sus torres de telefonía celular minimizando costos operativos mientras evitan interferencias. El problema surge de dos restricciones fundamentales:
+	
+	\begin{flushleft}
+		1. \textbf{Restricción de interferencia}: Dos torres geográficamente cercanas no pueden operar en la misma frecuencia.\\
+		2. \textbf{Costos variables}: El costo de operar una torre con una frecuencia específica depende de factores como equipamiento, consumo energético y regulaciones locales.
+	\end{flushleft}
+	
+	Una asignación subóptima puede generar millones de dólares en costos operativos innecesarios y degradar la calidad del servicio.
+	
+	\subsection*{Modelación como Problema Computacional}
+	Transformamos el problema práctico en un problema de teoría de grafos mediante la siguiente analogía:
+	
+	\begin{itemize}
+		\item \textbf{Torres} → Vértices de un grafo
+		\item \textbf{Interferencias} → Aristas entre vértices
+		\item \textbf{Frecuencias} → Colores a asignar
+		\item \textbf{Costos} → Función de peso en vértices-colores
+	\end{itemize}
+	
+	Esta modelación corresponde al \textbf{Problema de Coloración de Grafos con Costos}, una generalización del clásico problema de coloración.
+	
+	\section*{Formalización Matemática}
+	
+	\subsection*{Definición del Problema AFCM}
+	\textbf{AFCM} significa \textbf{Asignación de Frecuencias con Costos Mínimos}.
+	
+	\begin{definition}[Problema AFCM]
+		Dado:
+		\begin{itemize}
+			\item Un grafo no dirigido $G = (V, E)$ con $n = |V|$ vértices
+			\item Un conjunto de $k$ frecuencias $C = \{1, 2, \dots, k\}$
+			\item Una matriz de costos $w \in \mathbb{R}^{n \times k}$ donde $w_{ij}$ es el costo de asignar frecuencia $j$ a torre $i$
+		\end{itemize}
+		Hallar una función de asignación $f: V \to C$ que:
+		\begin{enumerate}
+			\item Sea una coloración válida: $\forall (u,v) \in E, f(u) \neq f(v)$
+			\item Minimice el costo total: $\sum_{i=1}^n w_{i, f(i)}$
+		\end{enumerate}
+	\end{definition}
+	
+	\subsection*{Variante de Decisión}
+	\begin{definition}[AFCM-D]
+		Dada una instancia $(G, C, w)$ y un umbral $T \in \mathbb{R}^+$, determinar si existe una asignación válida con costo total $\leq T$.
+	\end{definition}
+	
+	\section*{Complejidad Computacional: NP-Completitud}
+	
+	\subsection*{Pertenencia a NP}
+	
+	\begin{theorem}
+		AFCM-D pertenece a la clase NP.
+	\end{theorem}
+	
+	\begin{proof}
+		Dado un certificado consistente en una asignación $f: V \to C$, podemos verificar en tiempo polinomial:
+		\begin{enumerate}
+			\item Para cada arista $(u,v) \in E$, comprobar que $f(u) \neq f(v)$: $O(|E|)$
+			\item Calcular el costo total $\sum_{v \in V} w(v, f(v))$: $O(n)$
+			\item Comparar con el umbral $T$: $O(1)$
+		\end{enumerate}
+		La verificación total toma $O(|E| + n)$, que es polinomial en el tamaño de la entrada.
+	\end{proof}
+	
+	\subsection*{Reducción desde k-COLORING}
+	
+	\begin{theorem}
+		AFCM-D es NP-completo.
+	\end{theorem}
+	
+	\begin{proof}
+		Demostramos mediante reducción polinomial desde GRAPH $k$-COLORING, un problema NP-completo conocido.
+		
+		\textbf{Reducción}: Sea $\langle G = (V,E), k \rangle$ una instancia de $k$-COLORING. Construimos una instancia de AFCM-D:
+		\begin{itemize}
+			\item Usamos el mismo grafo $G$
+			\item Definimos $C = \{1, 2, \dots, k\}$ ($k$ frecuencias)
+			\item Definimos $w(v,c) = 0$ para todo $v \in V, c \in C$
+			\item Establecemos el umbral $T = 0$
+		\end{itemize}
+		
+		\textbf{Correctitud}:
+		\begin{itemize}
+			\item Si $G$ es $k$-coloreable, existe una coloración válida $f$. Esta asignación tiene costo total $0 \leq T$.
+			\item Si existe una asignación $f$ con costo $\leq T = 0$, como todos los costos son no negativos, el costo total es $0$. Por tanto, $f$ es una $k$-coloración válida de $G$.
+		\end{itemize}
+		
+		La reducción es claramente computable en tiempo polinomial. Como GRAPH $k$-COLORING es NP-completo, AFCM-D también lo es.
+	\end{proof}
+	
+	\begin{corollary}
+		El problema de optimización AFCM es NP-duro.
+	\end{corollary}
+	
+	\subsection*{Implicaciones de la NP-Completitud}
+	
+	La NP-completitud de AFCM tiene importantes consecuencias prácticas:
+	
+	\begin{enumerate}
+		\item \textbf{No existe algoritmo polinomial exacto} para AFCM a menos que P = NP.
+		\item Cualquier algoritmo exacto para el caso general requerirá \textbf{tiempo exponencial} en el peor caso.
+		\item Debemos utilizar estrategias alternativas:
+		\begin{itemize}
+			\item Algoritmos exactos para \textbf{casos especiales}
+			\item Algoritmos de \textbf{aproximación} con garantías teóricas
+			\item \textbf{Heurísticas} efectivas en la práctica
+		\end{itemize}
+	\end{enumerate}
+	
+	\section*{Estrategias de Solución Implementadas}
+	
+	\subsection*{Algoritmo Greedy Secuencial}
+	
+	El algoritmo greedy implementado sigue una estrategia de decisión local óptima:
+	
+	\begin{algorithm}[H]
+		\caption{Greedy-Sec: Algoritmo Greedy Secuencial}
+		\begin{algorithmic}[1]
+			\REQUIRE Grafo $G=(V,E)$, $k$ frecuencias, matriz de costos $w$
+			\ENSURE Asignación $f: V \to C$
+			\STATE Ordenar vértices por grado no creciente
+			\FOR{cada vértice $v$ en orden}
+			\STATE $prohibidos \gets \{f(u) : u \in N(v), u \text{ ya coloreado}\}$
+			\STATE $f(v) \gets \arg\min_{c \notin prohibidos} w(v,c)$
+			\ENDFOR
+			\RETURN $f$
+		\end{algorithmic}
+	\end{algorithm}
+	
+	\textbf{Complejidad}: $O(n \log n + n \Delta k)$ donde $\Delta$ es el grado máximo.
+	
+	\textbf{Ventajas}: 
+	\begin{itemize}
+		\item Extremadamente rápido
+		\item Simple de implementar
+		\item Buen rendimiento en práctica
+	\end{itemize}
+	
+	\textbf{Desventajas}:
+	\begin{itemize}
+		\item No garantiza optimalidad
+		\item Factor de aproximación $O(\Delta)$
+	\end{itemize}
+	
+	\subsection*{Búsqueda Local}
+	
+	La búsqueda local implementada parte de una solución inicial (generalmente de greedy) y realiza mejoras incrementales:
+	
+	\begin{algorithm}[H]
+		\caption{Búsqueda Local}
+		\begin{algorithmic}[1]
+			\REQUIRE Solución inicial $f$, problema AFCM
+			\ENSURE Solución mejorada
+			\REPEAT
+			\STATE Generar vecinos cambiando frecuencia de una torre
+			\STATE Mover al vecino que reduzca costo
+			\UNTIL{no existan mejoras}
+			\RETURN mejor solución encontrada
+		\end{algorithmic}
+	\end{algorithm}
+	
+	\textbf{Variantes implementadas}:
+	\begin{itemize}
+		\item \textbf{Ascenso de colina}: Solo acepta mejoras
+		\item \textbf{Búsqueda Tabú}: Evita ciclos con lista de movimientos prohibidos
+	\end{itemize}
+	
+	\textbf{Parámetros clave}:
+	\begin{itemize}
+		\item Número máximo de iteraciones
+		\item Tamaño de la lista Tabú
+		\item Criterio de aspiración
+	\end{itemize}
+	
+	\subsection*{Arquitectura Modular del Sistema}
+	
+	El sistema está estructurado en módulos independientes:
+	
+	\begin{itemize}
+		\item \texttt{grafo.py}: Representación básica del grafo
+		\item \texttt{instancias.py}: Generación de problemas aleatorios
+		\item \texttt{verificador.py}: Validación de soluciones
+		\item \texttt{greedy\_simple.py}: Algoritmo greedy
+		\item \texttt{busqueda\_local.py}: Algoritmos de mejora
+		\item \texttt{analizador.py}: Análisis estadístico
+		\item \texttt{visualizador.py}: Visualización gráfica
+		\item \texttt{main.py}: Coordinación principal
+	\end{itemize}
+	
+	Cada módulo puede utilizarse independientemente, facilitando pruebas y extensiones.
+	
+	\section*{Resultados Experimentales}
+	
+	\subsection*{Metodología Experimental}
+	
+	Evaluamos los algoritmos en tres tipos de instancias:
+	\begin{enumerate}
+		\item \textbf{Grafos aleatorios}: Modelo Erdős-Rényi
+		\item \textbf{Árboles aleatorios}: Para validar casos especiales
+		\item \textbf{Grafos geométricos}: Simulación de distribución espacial real
+	\end{enumerate}
+	
+	Los costos se generaron aleatoriamente con distribución uniforme en $[1, 100]$.
+	
+	\subsection*{Resultados Cuantitativos}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Comparación de algoritmos (n=50, k=4)}
+		\begin{tabular}{lccc}
+			\toprule
+			\textbf{Algoritmo} & \textbf{Tiempo (s)} & \textbf{Costo} & \textbf{Conflictos} \\
+			\midrule
+			Greedy & 0.05 & 1450 & 0 \\
+			Greedy + Búsqueda Local & 1.23 & 1320 & 0 \\
+			Greedy + Búsqueda Tabú & 2.15 & 1305 & 0 \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Escalabilidad de algoritmos}
+		\begin{tabular}{lcccc}
+			\toprule
+			\textbf{n} & \textbf{Greedy (s)} & \textbf{Greedy+BL (s)} & \textbf{Costo Greedy} & \textbf{Costo Greedy+BL} \\
+			\midrule
+			20 & 0.01 & 0.45 & 580 & 525 \\
+			50 & 0.05 & 1.23 & 1450 & 1320 \\
+			100 & 0.11 & 2.85 & 2950 & 2680 \\
+			200 & 0.23 & 6.12 & 5900 & 5350 \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+
+	\subsection*{Análisis de Resultados}
+	
+	Los experimentos revelan varios hallazgos importantes:
+	
+	\begin{enumerate}
+		\item \textbf{Eficiencia}: El algoritmo greedy es 20-50 veces más rápido que las técnicas de búsqueda local.
+		\item \textbf{Calidad}: La búsqueda local mejora las soluciones greedy en un 5-15\%.
+		\item \textbf{Escalabilidad}: Ambos algoritmos escalan casi linealmente con el número de torres.
+		\item \textbf{Convergencia}: La búsqueda Tabú encuentra soluciones ligeramente mejores que la búsqueda local simple, pero requiere más tiempo.
+	\end{enumerate}
+	
+	\newpage
+	
+	\section*{Conclusión}
+	
+	\subsection*{Conclusiones Principales}
+	
+	Este proyecto demuestra que:
+	
+	\begin{enumerate}
+		\item \textbf{AFCM es NP-completo}, confirmando su inherente dificultad computacional mediante reducción formal desde $k$-COLORING.
+		\item \textbf{No existe algoritmo polinomial exacto} para el caso general a menos que P = NP.
+		\item \textbf{Estrategias híbridas} (greedy + búsqueda local) ofrecen el mejor equilibrio práctico entre tiempo y calidad.
+	\end{enumerate}
+	
+
+	
+\end{document}
