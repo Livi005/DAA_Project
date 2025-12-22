@@ -1,3 +1,6 @@
+import time
+from verificador import verificar_solucion
+
 def comparar_algoritmos(problema, metodos):
     """
     Compara varios algoritmos en mismo problema

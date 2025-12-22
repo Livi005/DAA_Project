@@ -1,3 +1,5 @@
+from verificador import verificar_solucion
+
 def analizar_solucion(problema, asignacion):
     """
     Proporciona métricas sobre una solución

@@ -1,3 +1,6 @@
+import random
+from verificador import verificar_solucion
+
 def mejorar_solucion(problema, asignacion_inicial, max_iter=1000):
     """
     Mejora solución mediante búsqueda local

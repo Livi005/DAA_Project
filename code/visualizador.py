@@ -1,11 +1,13 @@
+import matplotlib.pyplot as plt
+import networkx as nx
+from analizador import analizar_solucion
+
 def dibujar_solucion(problema, asignacion, titulo=""):
     """
     Muestra grafo con colores según frecuencia asignada
     
     Solo para visualización, no modifica datos
     """
-    import matplotlib.pyplot as plt
-    import networkx as nx
     
     grafo = problema['grafo']
     G = nx.Graph()

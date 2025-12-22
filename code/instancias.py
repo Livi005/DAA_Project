@@ -1,5 +1,6 @@
 import random
-import numpy as np
+import numpy as np 
+from grafo import Grafo
 
 def crear_problema(n_torres, k_frecuencias):
     """Crea problema aleatorio sin resolver"""
