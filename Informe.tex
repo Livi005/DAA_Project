@@ -18,9 +18,9 @@
 \newtheorem{theorem}{Teorema}
 \newtheorem{corollary}{Corolario}
 
-\title{Informe Final: Problema de Asignación de Frecuencias con Costos Mínimos (AFCM)}
-\author{Olivia Ibañez Mustelier \\ Ciencia de la Computación, 4to Año}
-\date{6 de enero de 2026}
+\title{Empresa Telefónica}
+\author{Olivia Ibañez Mustelier \\ Ciencia de la Computación,C411}
+\date{}
 
 \begin{document}
 	
@@ -33,11 +33,11 @@
 	\tableofcontents
 	
 	\section{Introducción y Presentación del Problema Original}
-	\subsection{Contexto Industrial y Motivación}
+	\subsection{Contexto}
 	
 	En el sector de las telecomunicaciones móviles, la gestión eficiente del espectro radioeléctrico es un pilar fundamental para la calidad del servicio y la viabilidad económica. Operadoras como \textit{ConectaMax Telecom}—nombre ficticio inspirado en casos reales—se enfrentan diariamente al complejo reto de asignar frecuencias a sus miles de torres de telefonía celular. La física de la propagación de ondas y las regulaciones imponen una restricción irrenunciable: dos torres geográficamente cercanas no pueden operar en la misma frecuencia, so pena de generar interferencias que degradarían severamente la comunicación.
 	
-	Pero la cosa no termina ahí. Desde mi experiencia analizando problemas de optimización en redes, el verdadero desafío suele estar en los detalles económicos. El costo de operar una torre en una frecuencia específica no es uniforme. Depende de un entramado de factores: el equipamiento hardware instalado (que puede ser más eficiente en ciertas bandas), el consumo energético asociado, e incluso tarifas regulatorias y de licencia que varían por región y por banda espectral. Una asignación subóptima, lejos de ser un mero ejercicio académico, puede traducirse en millones de dólares en costos operativos innecesarios anuales para una operadora de gran escala.
+	Desde mi experiencia analizando problemas de optimización en redes, el verdadero desafío suele estar en los detalles económicos. El costo de operar una torre en una frecuencia específica no es uniforme. Depende de un entramado de factores: el equipamiento hardware instalado (que puede ser más eficiente en ciertas bandas), el consumo energético asociado, e incluso tarifas regulatorias y de licencia que varían por región y por banda espectral. Una asignación subóptima, lejos de ser un mero ejercicio académico, puede traducirse en millones de dólares en costos operativos innecesarios anuales para una operadora de gran escala.
 	
 	\subsection{Enunciado Formal del Problema}
 	
@@ -275,7 +275,7 @@
 	
 	\subsubsection{Comparación General de Algoritmos}
 	
-	La Tabla \ref{tab:comp_gen} resume los resultados para $n=50, k=4$ en grafos Erdős-Rényi.
+	La siguiente tabla resume los resultados para $n=50, k=4$ en grafos Erdős-Rényi.
 	
 	\begin{table}[h]
 		\centering
@@ -292,15 +292,15 @@
 		\end{tabular}
 	\end{table}
 	
-	El greedy es notablemente rápido, pero la búsqueda local logra una mejora de costo del 9\% (de 1450 a 1320) a un costo computacional moderado. La búsqueda tabú, aunque más lenta, encuentra soluciones ligeramente mejores, situándose como el mejor heuristico en estas pruebas.
+	El greedy es notablemente rápido, pero la búsqueda local logra una mejora de costo del 9\% (de 1450 a 1320) a un costo computacional moderado. La búsqueda tabú, aunque más lenta, encuentra soluciones ligeramente mejores, situándose como el mejor heurístico en estas pruebas.
 	
 	\subsubsection{Escalabilidad}
 	
-	La Figura \ref{fig:tiempos} (que sería un gráfico en el informe real) muestra cómo crece el tiempo de ejecución con $n$. Tanto GR como GR+BL exhiben un crecimiento aproximadamente lineal en el rango estudiado, siendo GR unas 20-50 veces más rápido. Para $n=200$, GR+BL toma alrededor de 6 segundos, un tiempo aún muy razonable para un problema de planificación.
+	Los tiempos de ejecución crecen de manera aproximadamente lineal con $n$, como se esperaba. Tanto GR como GR+BL exhiben este comportamiento, siendo GR unas 20-50 veces más rápido. Para $n=200$, GR+BL toma alrededor de 6 segundos, un tiempo aún muy razonable para un problema de planificación.
 	
 	\subsubsection{Impacto de la Topología del Grafo}
 	
-	Los resultados varían significativamente según el tipo de grafo (Tabla \ref{tab:por_tipo}).
+	Los resultados varían significativamente según el tipo de grafo.
 	
 	\begin{table}[h]
 		\centering
@@ -321,7 +321,7 @@
 	
 	\subsubsection{Convergencia de la Búsqueda Local}
 	
-	En nuestras ejecuciones, la búsqueda local simple convergió típicamente en 50-100 iteraciones (un pase completo por todos los vértices sin mejora). La búsqueda tabú, al permitir movimientos no mejorares, exploró más del espacio, a menudo encontrando mejoras tras la convergencia del ascenso de colina, justificando su mayor tiempo de ejecución.
+	En nuestras ejecuciones, la búsqueda local simple convergió típicamente en 50-100 iteraciones (un pase completo por todos los vértices sin mejora). La búsqueda tabú, al permitir movimientos no mejorantes, exploró más del espacio, a menudo encontrando mejoras tras la convergencia del ascenso de colina, justificando su mayor tiempo de ejecución.
 	
 	\section{Resultados y Conclusiones}
 	\subsection{Conclusiones Principales}
