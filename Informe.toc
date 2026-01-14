@@ -1,34 +1,35 @@
 \babel@toc {spanish}{}\relax 
-\contentsline {section}{\numberline {1}Introducción y Presentación del Problema Original}{2}{section.1}%
+\contentsline {section}{\numberline {1}Presentación del Problema Original}{2}{section.1}%
 \contentsline {subsection}{\numberline {1.1}Contexto}{2}{subsection.1.1}%
 \contentsline {subsection}{\numberline {1.2}Enunciado Formal del Problema}{2}{subsection.1.2}%
 \contentsline {section}{\numberline {2}Modelación y Formalización Matemática}{3}{section.2}%
 \contentsline {subsection}{\numberline {2.1}De Torre y Frecuencias a Vértices y Colores}{3}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Definición Matemática del Problema AFCM}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Formulación alternativa como ILP (Teórico)}{4}{subsection.2.3}%
 \contentsline {section}{\numberline {3}Complejidad Computacional: Demostración de NP-Completitud}{4}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Preliminar: El Problema de Coloración de Grafos (k-COLORING)}{4}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Pertenencia a NP}{4}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Reducción Polinomial desde k-COLORING}{4}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Implicaciones Prácticas de la NP-Completitud}{5}{subsection.3.4}%
-\contentsline {section}{\numberline {4}Estrategias de Solución}{5}{section.4}%
+\contentsline {subsection}{\numberline {3.2}Pertenencia a NP}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Reducción Polinomial desde k-COLORING}{5}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Implicaciones Prácticas de la NP-Completitud}{6}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Estrategias de Solución}{6}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Algoritmo Exacto de Fuerza Bruta (Backtracking)}{6}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Algoritmo Exacto para un Caso Especial: Árboles}{6}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Algoritmos Aproximados y Heurísticos para el Caso General}{7}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Algoritmo Greedy Secuencial}{7}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Búsqueda Local (Hill Climbing)}{7}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}Estrategia Híbrida Propuesta}{7}{subsubsection.4.3.3}%
-\contentsline {section}{\numberline {5}Implementación y Experimentación}{8}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Arquitectura del Software}{8}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Metodología Experimental}{8}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}Generación de Instancias}{8}{subsubsection.5.2.1}%
-\contentsline {subsubsection}{\numberline {5.2.2}Configuración de los Experimentos}{8}{subsubsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.3}Resultados y Análisis}{9}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}Validación con Fuerza Bruta}{9}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}Comparación General de Algoritmos}{9}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Escalabilidad}{9}{subsubsection.5.3.3}%
-\contentsline {subsubsection}{\numberline {5.3.4}Impacto de la Topología del Grafo}{9}{subsubsection.5.3.4}%
-\contentsline {subsubsection}{\numberline {5.3.5}Convergencia de la Búsqueda Local}{10}{subsubsection.5.3.5}%
-\contentsline {section}{\numberline {6}Resultados y Conclusiones}{10}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Conclusiones Principales}{10}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Trabajo Futuro}{11}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Reflexión Final}{11}{subsection.6.3}%
+\contentsline {subsection}{\numberline {4.2}Algoritmo Exacto para un Caso Especial: Árboles}{7}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Algoritmos Aproximados y Heurísticos para el Caso General}{8}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Algoritmo Greedy Secuencial}{8}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Búsqueda Local (Hill Climbing)}{8}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Estrategia Híbrida Propuesta}{9}{subsubsection.4.3.3}%
+\contentsline {section}{\numberline {5}Implementación y Experimentación}{9}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Arquitectura del Software}{9}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Metodología Experimental}{9}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Generación de Instancias}{9}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}Configuración de los Experimentos}{10}{subsubsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.3}Resultados y Análisis}{10}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Validación con Fuerza Bruta}{10}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Comparación General de Algoritmos}{11}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Escalabilidad}{11}{subsubsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.4}Impacto de la Topología del Grafo}{11}{subsubsection.5.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.5}Convergencia de la Búsqueda Local}{11}{subsubsection.5.3.5}%
+\contentsline {section}{\numberline {6}Resultados y Conclusiones}{12}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Conclusiones Principales}{12}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Trabajo Futuro}{12}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Reflexión Final}{13}{subsection.6.3}%

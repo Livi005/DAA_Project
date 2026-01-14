@@ -71,7 +71,7 @@
 		\begin{itemize}
 			\item Un grafo no dirigido $G = (V, E)$ con $|V| = n$ vértices.
 			\item Un conjunto de $k$ colores (frecuencias) $C = \{1, 2, \dots, k\}$.
-			\item Una función de costos $w: V \times C \to \mathbb{R}^+$.
+			\item Una función de costos $w: V \times C \to \mathbb{R}^*$.
 		\end{itemize}
 		Hallar una asignación (coloración) $f: V \to C$ que:
 		\begin{enumerate}
@@ -83,13 +83,13 @@
 	Para facilitar el análisis de complejidad, definimos también la versión de decisión.
 	
 	\begin{definition}[Problema AFCM de Decisión (AFCM-D)]
-		Dada una instancia $(G, C, w)$ y un umbral $T \in \mathbb{R}^+$, ¿existe una asignación válida $f$ tal que $\text{Costo}(f) \leq T$?
+		Dada una instancia $(G, C, w)$ y un umbral $T \in \mathbb{R}^*$, ¿existe una asignación válida $f$ tal que $\text{Costo}(f) \leq T$?
 	\end{definition}
 	
 	Esta formalización es el punto de partida para todo el análisis subsiguiente. Resulta claro que si todos los costos son iguales, el problema se reduce a decidir si el grafo es $k$-coloreable.
 	
 	% --- MEJORA AÑADIDA: ILP (no implementada), sin tocar tu contenido ---
-	\subsection{Formulación alternativa como ILP (no implementada)}
+	\subsection{Formulación alternativa como ILP (Teórico)}
 	
 	De manera complementaria, AFCM puede formularse como un modelo de programación entera lineal 0--1. Para cada vértice $v \in V$ y cada color $c \in C$, se define una variable binaria
 	\[

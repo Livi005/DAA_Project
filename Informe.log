@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.9.9)  6 JAN 2026 23:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.9.9)  13 JAN 2026 20:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -515,45 +515,53 @@ LaTeX Info: Redefining \% on input line 1.
 \tf@toc=\write4
 \openout4 = `Informe.toc'.
 
- [2]
-Overfull \hbox (8.90013pt too wide) in paragraph at lines 87--87
+ [2] [3]
+Overfull \hbox (8.90013pt too wide) in paragraph at lines 118--118
 []\OT1/cmr/bx/n/17.28 Complejidad Compu-tacio-nal: De-mos-tra-ci^^Son de NP-
  []
 
 
-Overfull \hbox (45.5841pt too wide) in paragraph at lines 88--88
+Overfull \hbox (45.5841pt too wide) in paragraph at lines 119--119
 []\OT1/cmr/bx/n/14.4 Preliminar: El Pro-ble-ma de Co-lo-ra-ci^^Son de Gra-fos (
 k-COLORING) 
  []
 
-[3] [4]
-Overfull \hbox (7.34013pt too wide) in paragraph at lines 139--140
+[4]
+Overfull \hbox (7.34013pt too wide) in paragraph at lines 174--175
 []\OT1/cmr/m/n/12 Como k-COLORING es NP-completo y he-mos re-du-ci-do po-li-no-
 mial-men-te k-COLORING
  []
 
-
-Overfull \hbox (3.6332pt too wide) in paragraph at lines 147--148
+[5]
+Overfull \hbox (3.6332pt too wide) in paragraph at lines 182--183
 []\OT1/cmr/m/n/12 Si exis-tie-ra un al-go-rit-mo po-li-no-mial pa-ra AFCM (op-t
 i-mi-za-ci^^Son), podr^^S^^Pamos
  []
 
-[5]
+[6]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 183.
- [6]
-Overfull \hbox (11.76953pt too wide) in paragraph at lines 223--224
+put line 248.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[7]
+Overfull \hbox (11.76953pt too wide) in paragraph at lines 288--289
 []\OT1/cmr/m/n/12 Para es-ca-par de ^^Sopti-mos lo-ca-les po-bres, im-ple-men-t
 a-mos tam-bi^^Sen una ver-si^^Son de \OT1/cmr/bx/n/12 B^^Susque-
  []
 
-[7] [8] [9]
-Overfull \hbox (23.06697pt too wide) in paragraph at lines 332--333
+[8] [9]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[10] [11]
+Overfull \hbox (23.06697pt too wide) in paragraph at lines 404--405
 []\OT1/cmr/bx/n/12 NP-Completitud: \OT1/cmr/m/n/12 Se de-mostr^^So for-mal-men-
 te, me-dian-te re-duc-ci^^Son des-de k-COLORING,
  []
 
-[10] [11] [12] (./Informe.aux
+[12] [13] (./Informe.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 )
@@ -561,17 +569,24 @@ LaTeX Info: Redefining \% on input line 11.
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-Package rerunfilecheck Info: File `Informe.out' has not changed.
-(rerunfilecheck)             Checksum: D54FAB8BBB98202F91E514DA0894CBD7;7596.
+
+
+Package rerunfilecheck Warning: File `Informe.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `Informe.out':
+(rerunfilecheck)             Before: 36ED4733463497AB830EDA802301D05E;7804
+(rerunfilecheck)             After:  5B545CCC401BABCC46B574A9E5944D97;7804.
  ) 
 Here is how much of TeX's memory you used:
- 12918 strings out of 474222
- 199301 string characters out of 5748734
+ 12930 strings out of 474222
+ 199519 string characters out of 5748734
  1942975 words of memory out of 5000000
- 34915 multiletter control sequences out of 15000+600000
+ 34922 multiletter control sequences out of 15000+600000
  570911 words of font info for 84 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,79p,1234b,778s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,10n,79p,1234b,764s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/te
@@ -588,10 +603,10 @@ cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy1
 hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/t
 exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texlive
 /texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Informe.pdf (12 pages, 246834 bytes).
+Output written on Informe.pdf (13 pages, 259238 bytes).
 PDF statistics:
- 379 PDF objects out of 1000 (max. 8388607)
- 327 compressed objects within 4 object streams
- 87 named destinations out of 1000 (max. 500000)
- 265 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 393 PDF objects out of 1000 (max. 8388607)
+ 340 compressed objects within 4 object streams
+ 92 named destinations out of 1000 (max. 500000)
+ 273 words of extra memory for PDF output out of 10000 (max. 10000000)
 
