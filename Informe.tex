@@ -32,12 +32,16 @@
 	
 	\tableofcontents
 	
-	\section{Introducción y Presentación del Problema Original}
+	\section{Presentación del Problema Original}
 	\subsection{Contexto}
 	
 	En el sector de las telecomunicaciones móviles, la gestión eficiente del espectro radioeléctrico es un pilar fundamental para la calidad del servicio y la viabilidad económica. Operadoras como \textit{ConectaMax Telecom}—nombre ficticio inspirado en casos reales—se enfrentan diariamente al complejo reto de asignar frecuencias a sus miles de torres de telefonía celular. La física de la propagación de ondas y las regulaciones imponen una restricción irrenunciable: dos torres geográficamente cercanas no pueden operar en la misma frecuencia, so pena de generar interferencias que degradarían severamente la comunicación.
 	
 	Desde mi experiencia analizando problemas de optimización en redes, el verdadero desafío suele estar en los detalles económicos. El costo de operar una torre en una frecuencia específica no es uniforme. Depende de un entramado de factores: el equipamiento hardware instalado (que puede ser más eficiente en ciertas bandas), el consumo energético asociado, e incluso tarifas regulatorias y de licencia que varían por región y por banda espectral. Una asignación subóptima, lejos de ser un mero ejercicio académico, puede traducirse en millones de dólares en costos operativos innecesarios anuales para una operadora de gran escala.
+	
+	% --- MEJORA AÑADIDA (sin eliminar texto) ---
+	Modelamos estos factores reales mediante una \textbf{matriz de costos torre--frecuencia} (o función $w(v,c)$), una \textbf{abstracción estándar en optimización combinatoria} que permite incorporar heterogeneidad económica sin perder la estructura del problema.
+	% ------------------------------------------
 	
 	\subsection{Enunciado Formal del Problema}
 	
@@ -84,6 +88,33 @@
 	
 	Esta formalización es el punto de partida para todo el análisis subsiguiente. Resulta claro que si todos los costos son iguales, el problema se reduce a decidir si el grafo es $k$-coloreable.
 	
+	% --- MEJORA AÑADIDA: ILP (no implementada), sin tocar tu contenido ---
+	\subsection{Formulación alternativa como ILP (no implementada)}
+	
+	De manera complementaria, AFCM puede formularse como un modelo de programación entera lineal 0--1. Para cada vértice $v \in V$ y cada color $c \in C$, se define una variable binaria
+	\[
+	x_{v,c} =
+	\begin{cases}
+		1, & \text{si el vértice } v \text{ usa el color } c,\\
+		0, & \text{en otro caso.}
+	\end{cases}
+	\]
+	
+	El objetivo es minimizar el costo total:
+	\[
+	\min \sum_{v \in V}\sum_{c \in C} w(v,c)\,x_{v,c}.
+	\]
+	
+	Sujeto a las restricciones:
+	\begin{enumerate}[label=(\alph*)]
+		\item \textbf{Asignación única por vértice:} $\sum_{c \in C} x_{v,c} = 1 \quad \forall v \in V$.
+		\item \textbf{Interferencia (adyacencia):} $x_{u,c} + x_{v,c} \le 1 \quad \forall \{u,v\}\in E,\ \forall c\in C$.
+		\item \textbf{Integralidad:} $x_{v,c} \in \{0,1\} \quad \forall v\in V,\ \forall c\in C$.
+	\end{enumerate}
+	
+	Esta formulación no se implementa en este trabajo, pero resulta útil como referencia teórica y permitiría resolver instancias pequeñas con solvers ILP.
+	% ------------------------------------------------
+	
 	\section{Complejidad Computacional: Demostración de NP-Completitud}
 	\subsection{Preliminar: El Problema de Coloración de Grafos (k-COLORING)}
 	
@@ -114,6 +145,10 @@
 	\subsection{Reducción Polinomial desde k-COLORING}
 	
 	La esencia de la demostración de NP-dureza reside en mostrar que un problema conocido NP-completo, como k-COLORING, puede transformarse en nuestro problema.
+	
+	% --- MEJORA AÑADIDA: intuición previa, sin tocar tu demostración ---
+	Antes de presentar la reducción formal, conviene remarcar por qué la elección $w'(v,c)=0$ y $T'=0$ fuerza la equivalencia con k-COLORING. Al fijar costos nulos se ``apaga'' el componente económico del problema: cualquier asignación válida tendrá necesariamente costo total $0$ (y cualquier asignación inválida no es aceptada por las restricciones). Por tanto, la pregunta ``¿existe una solución con costo $\le 0$?'' se convierte exactamente en ``¿existe una coloración válida con $k$ colores?''. Esta idea es la que la reducción formaliza a continuación.
+	% ------------------------------------------------
 	
 	\begin{theorem}
 		AFCM-D es NP-completo.
@@ -158,220 +193,257 @@
 	\end{enumerate}
 	
 	Personalmente, encuentro fascinante cómo un resultado de teoría de la computación, aparentemente abstracto, traza los límites de lo que es computacionalmente viable en un problema industrial tan tangible.
-	
+
 	\section{Estrategias de Solución}
+
+Dada la intrataibilidad del caso general, nuestro enfoque se bifurca: buscamos algoritmos exactos para casos manejables y algoritmos aproximados o heurísticos para el caso general, sin olvidar una línea base de fuerza bruta para validación.
+
+\subsection{Algoritmo Exacto de Fuerza Bruta (Backtracking)}
+
+Para instancias muy pequeñas ($n \leq 12$), implementamos un algoritmo de \textit{backtracking} que explora sistemáticamente el espacio de todas las posibles asignaciones de colores. La idea es sencilla pero instructiva: se asigna colores a los vértices uno a uno, podando la búsqueda cuando el costo parcial supera el mejor costo total encontrado hasta el momento o cuando se viola una restricción de adyacencia.
+
+\textbf{Complejidad:} En el peor caso, explora $k^n$ nodos, por lo que su tiempo es exponencial: $O(k^n \cdot \text{poli}(n))$. Su utilidad principal en este proyecto fue servir como \textit{oráculo de optimalidad} para validar la calidad de nuestras heurísticas en instancias diminutas.
+
+\subsection{Algoritmo Exacto para un Caso Especial: Árboles}
+
+Los árboles (grafos conexos acíclicos) son una familia de grafos sobre la que muchos problemas NP-duros se vuelven tratables. AFCM no es la excepción.
+
+\begin{theorem}
+	AFCM puede resolverse de manera óptima en árboles en tiempo $O(n \cdot k^2)$ mediante programación dinámica.
+\end{theorem}
+
+% --- MEJORA AÑADIDA: explicación DP completa (estado, subproblema, caso base, recurrencia, exactitud y por qué solo árboles) ---
+\textbf{Definición del subproblema (estado DP).} Se fija una raíz arbitraria $r$ y se orientan las aristas implícitamente hacia los hijos. Para cada vértice $v$ y cada color $c \in C$, se define:
+\[
+dp[v][c] = \text{costo mínimo de colorear el subárbol enraizado en } v \text{ suponiendo } f(v)=c.
+\]
+Es decir, el subproblema restringe el color del vértice actual y optimiza el resto del subárbol.
+
+\textbf{Caso base.} Si $v$ es hoja (no tiene hijos excepto, quizá, su padre en la orientación), entonces el subárbol de $v$ es el propio vértice, y:
+\[
+dp[v][c] = w(v,c).
+\]
+
+\textbf{Recurrencia (paso de programación dinámica).} Si $v$ tiene hijos $u_1,\dots,u_t$, entonces, dado que $f(v)=c$, cada hijo $u_i$ debe elegir un color $d \neq c$. Como los subárboles de distintos hijos son disjuntos en un árbol, sus decisiones pueden optimizarse independientemente y sumarse:
+\[
+dp[v][c] \;=\; w(v,c) \;+\; \sum_{u \in \text{Hijos}(v)} \min_{d \in C\setminus\{c\}} dp[u][d].
+\]
+
+\textbf{Respuesta final.} El costo óptimo del árbol completo es:
+\[
+\min_{c \in C} dp[r][c].
+\]
+
+\textbf{Por qué es exacto.} La exactitud se sigue del \textit{principio de optimalidad}: si fijamos $f(v)=c$, la elección óptima para cada subárbol hijo no depende de decisiones en otros subárboles, porque en un árbol no existen ciclos ni aristas ``cruzadas'' entre subárboles de hijos diferentes. Por tanto, tomar para cada hijo la mejor opción compatible ($d\neq c$) y sumar produce la solución global óptima para el subárbol de $v$.
+
+\textbf{Por qué solo funciona en árboles.} En grafos con ciclos, los ``subproblemas'' ya no son independientes: un vértice puede conectarse con otro que pertenezca a un supuesto ``subárbol'' distinto, y entonces la decisión de color en una parte del grafo restringe simultáneamente múltiples regiones. Esa dependencia global rompe la posibilidad de combinar óptimos locales por simple suma como en la recurrencia anterior.
+
+\textbf{Cálculo de complejidad.} Para cada vértice $v$ y cada color $c$ se calcula una suma sobre sus hijos. El término dominante es el cálculo de
+$\min_{d \neq c} dp[u][d]$ para cada hijo $u$ y cada $c$. En forma directa, para un hijo fijo $u$ y un color fijo $c$, se revisan $k-1$ valores $dp[u][d]$, lo cual cuesta $O(k)$. Como esto se repite para cada $c \in C$ (son $k$ colores), el costo por hijo es $O(k^2)$. Sumando sobre todos los hijos de todos los vértices, y usando que el número total de relaciones padre-hijo en un árbol es $n-1$, se obtiene $O(n\cdot k^2)$.
+% ----------------------------------------------------------------------------------------------
+
+La idea central del algoritmo es procesar el árbol desde las hojas hacia una raíz arbitraria. Para cada nodo $v$ y cada color posible $c$, calculamos $dp[v][c]$, el costo mínimo del subárbol enraizado en $v$, dado que $v$ se colorea con $c$. La recursión combina las soluciones óptimas de los hijos, forzando que estos usen un color diferente al de su padre.
+
+\begin{algorithm}[h]
+	\caption{Programación Dinámica para AFCM en Árboles}
+	\begin{algorithmic}[1]
+		\Procedure{DP-Tree}{$v$, $padre$}
+		\For{$c \in C$}
+		\State $dp[v][c] \gets w(v, c)$
+		\EndFor
+		\For{$u \in \text{Ady}(v)$} \Comment{Iterar sobre los hijos}
+		\If{$u \neq padre$}
+		\State \text{DP-Tree}($u$, $v$)
+		\For{$c \in C$}
+		\State $min\_costo\_hijo \gets \infty$
+		\For{$d \in C \setminus \{c\}$}
+		\State $min\_costo\_hijo \gets \min(min\_costo\_hijo, dp[u][d])$
+		\EndFor
+		\State $dp[v][c] \gets dp[v][c] + min\_costo\_hijo$
+		\EndFor
+		\EndIf
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+La optimalidad se sigue del principio de optimalidad de la programación dinámica. Este algoritmo no solo es eficiente, sino que nos proporciona un valioso punto de comparación para evaluar heurísticas en instancias que son árboles.
+
+\subsection{Algoritmos Aproximados y Heurísticos para el Caso General}
+
+Para grafos arbitrarios, nos centramos en estrategias que sacrifiquen optimalidad a cambio de eficiencia.
+
+\subsubsection{Algoritmo Greedy Secuencial}
+
+Este es probablemente el enfoque más intuitivo. Ordenamos los vértices de mayor a menor grado (idea basada en la heurística \textit{DSATUR} para coloración) y, en ese orden, asignamos a cada vértice el color válido (no usado por un vecino ya coloreado) de menor costo.
+
+\textbf{Complejidad:} $O(n \log n + n \cdot \Delta \cdot k)$, donde $\Delta$ es el grado máximo. Es extremadamente rápido.
+
+\textbf{Análisis de Aproximación:} En el peor caso, su factor de aproximación puede ser tan malo como $O(\Delta)$. Consideremos un grafo estrella con centro $u$ y $\Delta$ hojas. Si el color más barato para $u$ es $c_1$ (costo 0) y para las hojas también es $c_1$ (costo 0), pero un algoritmo greedy colorea primero a $u$ con $c_1$, obliga a todas las hojas a tomar otros colores con costo $M$. El costo total sería $\Delta \cdot M$, mientras que el óptimo (colorear $u$ con otro color de costo $M$ y las hojas con $c_1$) cuesta solo $M$. La relación es $\Delta$.
+
+\subsubsection{Búsqueda Local (Hill Climbing)}
+
+Partiendo de una solución inicial (la del greedy, por ejemplo), la búsqueda local intenta mejorarla realizando cambios incrementales. La variante más simple, \textit{ascenso de colina}, evalúa para cada vértice el cambio a un color diferente que reduzca el costo total, realizando el primer movimiento de mejora encontrado. Se repite hasta alcanzar un óptimo local.
+
+Para escapar de óptimos locales pobres, implementamos también una versión de \textbf{Búsqueda Tabú} \cite{Glover1997}. Esta mantiene una memoria a corto plazo (lista tabú) de movimientos recientes que están prohibidos, forzando la exploración de nuevas zonas del espacio de búsqueda. Se incluye un \textit{criterio de aspiración} que permite sobrepasar la tabuidad si el movimiento conduce a una solución mejor que la mejor global encontrada. Los parámetros clave—tamaño de la lista tabú y número máximo de iteraciones—se fijaron en 7 y 1000 respectivamente tras algunas pruebas preliminares.
+
+Desde mi punto de vista, la belleza de la búsqueda tabú está en su simplicidad conceptual y su efectividad práctica para problemas de optimización combinatoria como este.
+
+\subsubsection{Estrategia Híbrida Propuesta}
+
+La estrategia que ofreció el mejor balance en nuestros experimentos fue híbrida:
+\begin{enumerate}
+	\item \textbf{Fase 1:} Generar una solución inicial rápida y razonable usando el \textbf{algoritmo greedy secuencial}.
+	\item \textbf{Fase 2:} Refinar esa solución aplicando \textbf{búsqueda local} (o búsqueda tabú para mayor refinamiento).
+\end{enumerate}
+Esta combinación captura lo mejor de ambos mundos: la velocidad del greedy y la capacidad de mejora de la búsqueda local.
+
+\section{Implementación y Experimentación}
+\subsection{Arquitectura del Software}
+
+El proyecto se implementó en Python 3.9, organizado en módulos para facilitar la extensión y reproducibilidad:
+\begin{itemize}
+	\item \texttt{grafo.py}: Estructuras de datos para grafos (listas de adyacencia).
+	\item \texttt{instancias.py}: Generadores de instancias de prueba.
+	\item \texttt{algoritmos/}: Contiene los módulos de \texttt{fuerza\_bruta.py}, \texttt{dp\_arbol.py}, \texttt{greedy.py}, \texttt{busqueda\_local.py}.
+	\item \texttt{verificador.py}: Valida legalidad y calcula costo de una solución.
+	\item \texttt{experimentos.py}: Orquesta la ejecución de pruebas y recolección de datos.
+	\item \texttt{visualizador.py}: Genera gráficas (usando Matplotlib).
+\end{itemize}
+El código está disponible en un repositorio GitHub con licencia académica.
+
+\subsection{Metodología Experimental}
+\subsubsection{Generación de Instancias}
+
+Para evaluar robustez, usamos tres modelos de grafos, cada uno con 50 instancias independientes por configuración $(n, k)$:
+\begin{enumerate}
+	\item \textbf{Grafos Aleatorios Erdős-Rényi ($G(n, p)$)}: Con $p=0.3$. Modelan interconexiones aleatorias. \cite{Erdos1959}
+	\item \textbf{Árboles Aleatorios}: Generados via secuencias de Prüfer. Modelan topologías jerárquicas. \cite{Prufer1918}
+	\item \textbf{Grafos Geométricos Aleatorios}: $n$ puntos uniformes en $[0,1]^2$, conectados si distancia $\leq 0.3$. Modelan distribución espacial real de torres. \cite{Penrose2003}
+\end{enumerate}
+Los costos $w(v,c)$ se muestrearon de una distribución uniforme discreta en $[1, 100]$, simulando variabilidad de costos.
+
+\subsubsection{Configuración de los Experimentos}
+
+\begin{itemize}
+	\item \textbf{Tamaños ($n$)}: 10 (solo para validación con fuerza bruta), 20, 50, 100, 200.
+	\item \textbf{Número de colores ($k$)}: 3 y 4.
+	\item \textbf{Algoritmos evaluados}: Fuerza Bruta (FB), Greedy (GR), Greedy + Búsqueda Local (GR+BL), Greedy + Búsqueda Tabú (GR+BT), Programación Dinámica para Árboles (DP).
+	\item \textbf{Métricas}: Tiempo de ejecución (segundos), costo total de la solución, número de conflictos (debe ser 0), y factor de aproximación empírico (costo/algoritmo óptimo o mejor conocido).
+\end{itemize}
+
+% --- MEJORA AÑADIDA: definición explícita de "conflictos" y aclaración de promedios ---
+\noindent \textbf{Nota sobre ``conflictos''.} Se entiende por \textit{conflicto} una violación de la restricción de interferencia: una arista $\{u,v\}\in E$ tal que $f(u)=f(v)$. En este trabajo, todas las soluciones reportadas por los algoritmos finales se verifican con \texttt{verificador.py}, por lo que el número de conflictos reportado debe ser 0; cualquier solución con conflictos se considera inválida y no se incluye como solución factible.
+
+\noindent \textbf{Promedios experimentales.} Las métricas de costo y tiempo se reportan como promedios sobre 50 instancias independientes para cada configuración $(n,k)$ y para cada tipo de grafo, evitando mezclar topologías distintas.
+% -------------------------------------------------------------------------------
+
+Los experimentos se ejecutaron en un equipo con procesador Intel Core i7-10750H, 16 GB de RAM, bajo Windows 11.
+
+\subsection{Resultados y Análisis}
+\subsubsection{Validación con Fuerza Bruta}
+
+Para instancias muy pequeñas ($n=10, k=3$), el algoritmo de fuerza bruta (FB) nos dio el costo óptimo de referencia. En promedio sobre 50 instancias, Greedy (GR) obtuvo un costo un 11\% superior al óptimo, mientras que Greedy+Búsqueda Local (GR+BL) lo redujo a solo un 2\% por encima, confirmando la capacidad de mejora de la búsqueda local incluso partiendo de una solución greedy.
+
+\subsubsection{Comparación General de Algoritmos}
+
+La siguiente tabla resume los resultados para $n=50, k=4$ en grafos Erdős-Rényi.
+
+\begin{table}[h]
+	\centering
+	\caption{Comparación de algoritmos para $n=50, k=4$ (grafos Erdős-Rényi). Promedio sobre 50 instancias.}
+	\label{tab:comp_gen}
+	\begin{tabular}{lcccc}
+		\toprule
+		\textbf{Algoritmo} & \textbf{Tiempo (s)} & \textbf{Costo Prom.} & \textbf{Conflictos} & \textbf{Factor Aprox.} \\
+		\midrule
+		Greedy (GR)        & 0.05 & 1450 & 0 & 1.11 \\
+		GR + Búsq. Local   & 1.23 & 1320 & 0 & 1.01 \\
+		GR + Búsq. Tabú    & 2.15 & \textbf{1305} & 0 & \textbf{1.00} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+El greedy es notablemente rápido, pero la búsqueda local logra una mejora de costo del 9\% (de 1450 a 1320) a un costo computacional moderado. La búsqueda tabú, aunque más lenta, encuentra soluciones ligeramente mejores, situándose como el mejor heurístico en estas pruebas.
+
+\subsubsection{Escalabilidad}
+
+Los tiempos de ejecución crecen de manera aproximadamente lineal con $n$, como se esperaba. Tanto GR como GR+BL exhiben este comportamiento, siendo GR unas 20-50 veces más rápido. Para $n=200$, GR+BL toma alrededor de 6 segundos, un tiempo aún muy razonable para un problema de planificación.
+
+\subsubsection{Impacto de la Topología del Grafo}
+
+Los resultados varían significativamente según el tipo de grafo.
+
+\begin{table}[h]
+	\centering
+	\caption{Resultados por tipo de grafo ($n=50, k=4$). Costo promedio.}
+	\label{tab:por_tipo}
+	\begin{tabular}{lcccc}
+		\toprule
+		\textbf{Tipo de Grafo} & \textbf{GR} & \textbf{GR+BL} & \textbf{Óptimo (DP)} & \textbf{Factor GR+BL} \\
+		\midrule
+		Erdős-Rényi  & 1450 & 1320 & N/A & 1.01 \\
+		Árboles      & 850  & 820  & 815 & \textbf{1.006} \\
+		Geométrico   & 1600 & 1480 & N/A & 1.02 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+En \textbf{árboles}, nuestras heurísticas están muy cerca del óptimo (0.6\% de diferencia en promedio), lo que sugiere que el greedy por grado funciona excepcionalmente bien en esta estructura. Para grafos \textbf{geométricos}, más densos localmente, los costos son mayores y la mejora relativa de GR+BL sobre GR es más acentuada (cerca del 7.5\%). Estos detalles son cruciales: un planificador de redes, conociendo la distribución geográfica de sus torres (que se asemeja a un grafo geométrico), puede priorizar el uso de técnicas de mejora como la búsqueda local.
+
+\subsubsection{Convergencia de la Búsqueda Local}
+
+En nuestras ejecuciones, la búsqueda local simple convergió típicamente en 50-100 iteraciones (un pase completo por todos los vértices sin mejora). La búsqueda tabú, al permitir movimientos no mejorantes, exploró más del espacio, a menudo encontrando mejoras tras la convergencia del ascenso de colina, justificando su mayor tiempo de ejecución.
+
+\section{Resultados y Conclusiones}
+\subsection{Conclusiones Principales}
+
+Este proyecto ha permitido abordar en profundidad el Problema de Asignación de Frecuencias con Costos Mínimos (AFCM), llegando a las siguientes conclusiones:
+
+\begin{enumerate}
+	\item \textbf{NP-Completitud:} Se demostró formalmente, mediante reducción desde k-COLORING, que AFCM es NP-completo. Esto cierra la puerta a la existencia de algoritmos exactos y polinomiales para el caso general y justifica el uso de enfoques aproximados.
 	
-	Dada la intrataibilidad del caso general, nuestro enfoque se bifurca: buscamos algoritmos exactos para casos manejables y algoritmos aproximados o heurísticos para el caso general, sin olvidar una línea base de fuerza bruta para validación.
+	\item \textbf{Soluciones Exáctas para Casos Especiales:} Para la familia de grafos árbol, se diseñó e implementó un algoritmo de programación dinámica con complejidad $O(n \cdot k^2)$ que encuentra la solución óptima. Este resultado es valioso para subredes con topología jerárquica.
 	
-	\subsection{Algoritmo Exacto de Fuerza Bruta (Backtracking)}
+	\item \textbf{Estrategias Eficientes para el Caso General:} Se implementaron y compararon varias heurísticas. El \textbf{algoritmo greedy secuencial} es extremadamente rápido pero de calidad variable. Las técnicas de \textbf{búsqueda local}, en particular la \textbf{búsqueda tabú}, logran mejoras sustanciales (5-15\% en costo) con un aumento de tiempo computacional aceptable.
 	
-	Para instancias muy pequeñas ($n \leq 12$), implementamos un algoritmo de \textit{backtracking} que explora sistemáticamente el espacio de todas las posibles asignaciones de colores. La idea es sencilla pero instructiva: se asigna colores a los vértices uno a uno, podando la búsqueda cuando el costo parcial supera el mejor costo total encontrado hasta el momento o cuando se viola una restricción de adyacencia.
-	
-	\textbf{Complejidad:} En el peor caso, explora $k^n$ nodos, por lo que su tiempo es exponencial: $O(k^n \cdot \text{poli}(n))$. Su utilidad principal en este proyecto fue servir como \textit{oráculo de optimalidad} para validar la calidad de nuestras heurísticas en instancias diminutas.
-	
-	\subsection{Algoritmo Exacto para un Caso Especial: Árboles}
-	
-	Los árboles (grafos conexos acíclicos) son una familia de grafos sobre la que muchos problemas NP-duros se vuelven tratables. AFCM no es la excepción.
-	
-	\begin{theorem}
-		AFCM puede resolverse de manera óptima en árboles en tiempo $O(n \cdot k^2)$ mediante programación dinámica.
-	\end{theorem}
-	
-	La idea central del algoritmo es procesar el árbol desde las hojas hacia una raíz arbitraria. Para cada nodo $v$ y cada color posible $c$, calculamos $dp[v][c]$, el costo mínimo del subárbol enraizado en $v$, dado que $v$ se colorea con $c$. La recursión combina las soluciones óptimas de los hijos, forzando que estos usen un color diferente al de su padre.
-	
-	\begin{algorithm}[h]
-		\caption{Programación Dinámica para AFCM en Árboles}
-		\begin{algorithmic}[1]
-			\Procedure{DP-Tree}{$v$, $padre$}
-			\For{$c \in C$}
-			\State $dp[v][c] \gets w(v, c)$
-			\EndFor
-			\For{$u \in \text{Ady}(v)$} \Comment{Iterar sobre los hijos}
-			\If{$u \neq padre$}
-			\State \text{DP-Tree}($u$, $v$)
-			\For{$c \in C$}
-			\State $min\_costo\_hijo \gets \infty$
-			\For{$d \in C \setminus \{c\}$}
-			\State $min\_costo\_hijo \gets \min(min\_costo\_hijo, dp[u][d])$
-			\EndFor
-			\State $dp[v][c] \gets dp[v][c] + min\_costo\_hijo$
-			\EndFor
-			\EndIf
-			\EndFor
-			\EndProcedure
-		\end{algorithmic}
-	\end{algorithm}
-	
-	La optimalidad se sigue del principio de optimalidad de la programación dinámica. Este algoritmo no solo es eficiente, sino que nos proporciona un valioso punto de comparación para evaluar heurísticas en instancias que son árboles.
-	
-	\subsection{Algoritmos Aproximados y Heurísticos para el Caso General}
-	
-	Para grafos arbitrarios, nos centramos en estrategias que sacrifiquen optimalidad a cambio de eficiencia.
-	
-	\subsubsection{Algoritmo Greedy Secuencial}
-	
-	Este es probablemente el enfoque más intuitivo. Ordenamos los vértices de mayor a menor grado (idea basada en la heurística \textit{DSATUR} para coloración) y, en ese orden, asignamos a cada vértice el color válido (no usado por un vecino ya coloreado) de menor costo.
-	
-	\textbf{Complejidad:} $O(n \log n + n \cdot \Delta \cdot k)$, donde $\Delta$ es el grado máximo. Es extremadamente rápido.
-	
-	\textbf{Análisis de Aproximación:} En el peor caso, su factor de aproximación puede ser tan malo como $O(\Delta)$. Consideremos un grafo estrella con centro $u$ y $\Delta$ hojas. Si el color más barato para $u$ es $c_1$ (costo 0) y para las hojas también es $c_1$ (costo 0), pero un algoritmo greedy colorea primero a $u$ con $c_1$, obliga a todas las hojas a tomar otros colores con costo $M$. El costo total sería $\Delta \cdot M$, mientras que el óptimo (colorear $u$ con otro color de costo $M$ y las hojas con $c_1$) cuesta solo $M$. La relación es $\Delta$.
-	
-	\subsubsection{Búsqueda Local (Hill Climbing)}
-	
-	Partiendo de una solución inicial (la del greedy, por ejemplo), la búsqueda local intenta mejorarla realizando cambios incrementales. La variante más simple, \textit{ascenso de colina}, evalúa para cada vértice el cambio a un color diferente que reduzca el costo total, realizando el primer movimiento de mejora encontrado. Se repite hasta alcanzar un óptimo local.
-	
-	Para escapar de óptimos locales pobres, implementamos también una versión de \textbf{Búsqueda Tabú} \cite{Glover1997}. Esta mantiene una memoria a corto plazo (lista tabú) de movimientos recientes que están prohibidos, forzando la exploración de nuevas zonas del espacio de búsqueda. Se incluye un \textit{criterio de aspiración} que permite sobrepasar la tabuidad si el movimiento conduce a una solución mejor que la mejor global encontrada. Los parámetros clave—tamaño de la lista tabú y número máximo de iteraciones—se fijaron en 7 y 1000 respectivamente tras algunas pruebas preliminares.
-	
-	Desde mi punto de vista, la belleza de la búsqueda tabú está en su simplicidad conceptual y su efectividad práctica para problemas de optimización combinatoria como este.
-	
-	\subsubsection{Estrategia Híbrida Propuesta}
-	
-	La estrategia que ofreció el mejor balance en nuestros experimentos fue híbrida:
-	\begin{enumerate}
-		\item \textbf{Fase 1:} Generar una solución inicial rápida y razonable usando el \textbf{algoritmo greedy secuencial}.
-		\item \textbf{Fase 2:} Refinar esa solución aplicando \textbf{búsqueda local} (o búsqueda tabú para mayor refinamiento).
-	\end{enumerate}
-	Esta combinación captura lo mejor de ambos mundos: la velocidad del greedy y la capacidad de mejora de la búsqueda local.
-	
-	\section{Implementación y Experimentación}
-	\subsection{Arquitectura del Software}
-	
-	El proyecto se implementó en Python 3.9, organizado en módulos para facilitar la extensión y reproducibilidad:
+	\item \textbf{Validación Experimental Rigurosa:} El análisis experimental, realizado sobre tres tipos de grafos y con un número significativo de instancias, confirma los hallazgos teóricos y ofrece guías prácticas:
 	\begin{itemize}
-		\item \texttt{grafo.py}: Estructuras de datos para grafos (listas de adyacencia).
-		\item \texttt{instancias.py}: Generadores de instancias de prueba.
-		\item \texttt{algoritmos/}: Contiene los módulos de \texttt{fuerza\_bruta.py}, \texttt{dp\_arbol.py}, \texttt{greedy.py}, \texttt{busqueda\_local.py}.
-		\item \texttt{verificador.py}: Valida legalidad y calcula costo de una solución.
-		\item \texttt{experimentos.py}: Orquesta la ejecución de pruebas y recolección de datos.
-		\item \texttt{visualizador.py}: Genera gráficas (usando Matplotlib).
+		\item La combinación \textit{Greedy + Búsqueda Local} ofrece el mejor balance tiempo-calidad para la mayoría de los escenarios.
+		\item En árboles, las heurísticas simples son casi óptimas.
+		\item La topología del grafo (modelada por el tipo de grafo) influye decisivamente en la dificultad del problema y en el desempeño relativo de los algoritmos.
 	\end{itemize}
-	El código está disponible en un repositorio GitHub con licencia académica.
-	
-	\subsection{Metodología Experimental}
-	\subsubsection{Generación de Instancias}
-	
-	Para evaluar robustez, usamos tres modelos de grafos, cada uno con 50 instancias independientes por configuración $(n, k)$:
-	\begin{enumerate}
-		\item \textbf{Grafos Aleatorios Erdős-Rényi ($G(n, p)$)}: Con $p=0.3$. Modelan interconexiones aleatorias. \cite{Erdos1959}
-		\item \textbf{Árboles Aleatorios}: Generados via secuencias de Prüfer. Modelan topologías jerárquicas. \cite{Prufer1918}
-		\item \textbf{Grafos Geométricos Aleatorios}: $n$ puntos uniformes en $[0,1]^2$, conectados si distancia $\leq 0.3$. Modelan distribución espacial real de torres. \cite{Penrose2003}
-	\end{enumerate}
-	Los costos $w(v,c)$ se muestrearon de una distribución uniforme discreta en $[1, 100]$, simulando variabilidad de costos.
-	
-	\subsubsection{Configuración de los Experimentos}
-	
-	\begin{itemize}
-		\item \textbf{Tamaños ($n$)}: 10 (solo para validación con fuerza bruta), 20, 50, 100, 200.
-		\item \textbf{Número de colores ($k$)}: 3 y 4.
-		\item \textbf{Algoritmos evaluados}: Fuerza Bruta (FB), Greedy (GR), Greedy + Búsqueda Local (GR+BL), Greedy + Búsqueda Tabú (GR+BT), Programación Dinámica para Árboles (DP).
-		\item \textbf{Métricas}: Tiempo de ejecución (segundos), costo total de la solución, número de conflictos (debe ser 0), y factor de aproximación empírico (costo/algoritmo óptimo o mejor conocido).
-	\end{itemize}
-	Los experimentos se ejecutaron en un equipo con procesador Intel Core i7-10750H, 16 GB de RAM, bajo Windows 11.
-	
-	\subsection{Resultados y Análisis}
-	\subsubsection{Validación con Fuerza Bruta}
-	
-	Para instancias muy pequeñas ($n=10, k=3$), el algoritmo de fuerza bruta (FB) nos dio el costo óptimo de referencia. En promedio sobre 50 instancias, Greedy (GR) obtuvo un costo un 11\% superior al óptimo, mientras que Greedy+Búsqueda Local (GR+BL) lo redujo a solo un 2\% por encima, confirmando la capacidad de mejora de la búsqueda local incluso partiendo de una solución greedy.
-	
-	\subsubsection{Comparación General de Algoritmos}
-	
-	La siguiente tabla resume los resultados para $n=50, k=4$ en grafos Erdős-Rényi.
-	
-	\begin{table}[h]
-		\centering
-		\caption{Comparación de algoritmos para $n=50, k=4$ (grafos Erdős-Rényi). Promedio sobre 50 instancias.}
-		\label{tab:comp_gen}
-		\begin{tabular}{lcccc}
-			\toprule
-			\textbf{Algoritmo} & \textbf{Tiempo (s)} & \textbf{Costo Prom.} & \textbf{Conflictos} & \textbf{Factor Aprox.} \\
-			\midrule
-			Greedy (GR)        & 0.05 & 1450 & 0 & 1.11 \\
-			GR + Búsq. Local   & 1.23 & 1320 & 0 & 1.01 \\
-			GR + Búsq. Tabú    & 2.15 & \textbf{1305} & 0 & \textbf{1.00} \\
-			\bottomrule
-		\end{tabular}
-	\end{table}
-	
-	El greedy es notablemente rápido, pero la búsqueda local logra una mejora de costo del 9\% (de 1450 a 1320) a un costo computacional moderado. La búsqueda tabú, aunque más lenta, encuentra soluciones ligeramente mejores, situándose como el mejor heurístico en estas pruebas.
-	
-	\subsubsection{Escalabilidad}
-	
-	Los tiempos de ejecución crecen de manera aproximadamente lineal con $n$, como se esperaba. Tanto GR como GR+BL exhiben este comportamiento, siendo GR unas 20-50 veces más rápido. Para $n=200$, GR+BL toma alrededor de 6 segundos, un tiempo aún muy razonable para un problema de planificación.
-	
-	\subsubsection{Impacto de la Topología del Grafo}
-	
-	Los resultados varían significativamente según el tipo de grafo.
-	
-	\begin{table}[h]
-		\centering
-		\caption{Resultados por tipo de grafo ($n=50, k=4$). Costo promedio.}
-		\label{tab:por_tipo}
-		\begin{tabular}{lcccc}
-			\toprule
-			\textbf{Tipo de Grafo} & \textbf{GR} & \textbf{GR+BL} & \textbf{Óptimo (DP)} & \textbf{Factor GR+BL} \\
-			\midrule
-			Erdős-Rényi  & 1450 & 1320 & N/A & 1.01 \\
-			Árboles      & 850  & 820  & 815 & \textbf{1.006} \\
-			Geométrico   & 1600 & 1480 & N/A & 1.02 \\
-			\bottomrule
-		\end{tabular}
-	\end{table}
-	
-	En \textbf{árboles}, nuestras heurísticas están muy cerca del óptimo (0.6\% de diferencia en promedio), lo que sugiere que el greedy por grado funciona excepcionalmente bien en esta estructura. Para grafos \textbf{geométricos}, más densos localmente, los costos son mayores y la mejora relativa de GR+BL sobre GR es más acentuada (cerca del 7.5\%). Estos detalles son cruciales: un planificador de redes, conociendo la distribución geográfica de sus torres (que se asemeja a un grafo geométrico), puede priorizar el uso de técnicas de mejora como la búsqueda local.
-	
-	\subsubsection{Convergencia de la Búsqueda Local}
-	
-	En nuestras ejecuciones, la búsqueda local simple convergió típicamente en 50-100 iteraciones (un pase completo por todos los vértices sin mejora). La búsqueda tabú, al permitir movimientos no mejorantes, exploró más del espacio, a menudo encontrando mejoras tras la convergencia del ascenso de colina, justificando su mayor tiempo de ejecución.
-	
-	\section{Resultados y Conclusiones}
-	\subsection{Conclusiones Principales}
-	
-	Este proyecto ha permitido abordar en profundidad el Problema de Asignación de Frecuencias con Costos Mínimos (AFCM), llegando a las siguientes conclusiones:
-	
-	\begin{enumerate}
-		\item \textbf{NP-Completitud:} Se demostró formalmente, mediante reducción desde k-COLORING, que AFCM es NP-completo. Esto cierra la puerta a la existencia de algoritmos exactos y polinomiales para el caso general y justifica el uso de enfoques aproximados.
-		
-		\item \textbf{Soluciones Exáctas para Casos Especiales:} Para la familia de grafos árbol, se diseñó e implementó un algoritmo de programación dinámica con complejidad $O(n \cdot k^2)$ que encuentra la solución óptima. Este resultado es valioso para subredes con topología jerárquica.
-		
-		\item \textbf{Estrategias Eficientes para el Caso General:} Se implementaron y compararon varias heurísticas. El \textbf{algoritmo greedy secuencial} es extremadamente rápido pero de calidad variable. Las técnicas de \textbf{búsqueda local}, en particular la \textbf{búsqueda tabú}, logran mejoras sustanciales (5-15\% en costo) con un aumento de tiempo computacional aceptable.
-		
-		\item \textbf{Validación Experimental Rigurosa:} El análisis experimental, realizado sobre tres tipos de grafos y con un número significativo de instancias, confirma los hallazgos teóricos y ofrece guías prácticas:
-		\begin{itemize}
-			\item La combinación \textit{Greedy + Búsqueda Local} ofrece el mejor balance tiempo-calidad para la mayoría de los escenarios.
-			\item En árboles, las heurísticas simples son casi óptimas.
-			\item La topología del grafo (modelada por el tipo de grafo) influye decisivamente en la dificultad del problema y en el desempeño relativo de los algoritmos.
-		\end{itemize}
-	\end{enumerate}
-	
-	En mi opinión, un hallazgo particularmente relevante para la práctica es que, aunque el greedy tiene una cota de aproximación teórica pesimista ($O(\Delta)$), en la práctica su rendimiento es mucho mejor, especialmente cuando se complementa con búsqueda local. Esto es algo que he observado en otros problemas de optimización combinatoria: el análisis del peor caso a veces esconde un comportamiento promedio bastante más favorable.
-	
-	\subsection{Trabajo Futuro}
-	
-	Este proyecto abre varias líneas de investigación interesantes:
-	\begin{itemize}
-		\item \textbf{Otras Metaheurísticas:} Explorar el desempeño de algoritmos genéticos, recocido simulado o colonias de hormigas en este problema.
-		\item \textbf{Cotas de Aproximación más Estrechas:} Investigar si para clases restringidas de grafos (planos, de grado acotado) se pueden diseñar algoritmos de aproximación con factor constante garantizado.
-		\item \textbf{Modelos más Realistas:} Incorporar interferencia co-canal y adyacente, múltiples antenas por torre, o costos dinámicos que dependan del patrón de tráfico.
-		\item \textbf{Optimización de Hiperparámetros:} Realizar un estudio sistemático para ajustar los parámetros de la búsqueda tabú (tamaño de lista, criterio de aspiración) en función del tipo de instancia.
-	\end{itemize}
-	
-	\subsection{Reflexión Final}
-	
-	El problema AFCM es un ejemplo paradigmático de cómo un desafío industrial concreto—optimizar costos en una red de telecomunicaciones—se transforma en un problema abstracto de teoría de grafos y optimización combinatoria, revelando su inherente complejidad computacional (NP-completitud). Sin embargo, esta complejidad no es una barrera infranqueable. Mediante una combinación inteligente de teoría (análisis de complejidad, diseño de algoritmos exactos para casos especiales) y práctica (implementación de heurísticas eficientes, evaluación experimental rigurosa), es posible desarrollar soluciones viables y de alta calidad.
-	
-	Este ciclo de modelación, análisis teórico, diseño algorítmico y validación empírica constituye, a mi juicio, la esencia misma de la Ciencia de la Computación aplicada. El presente trabajo no solo aporta soluciones concretas a un problema específico, sino que también ilustra la metodología necesaria para enfrentar una amplia gama de problemas de optimización en ingeniería.
-	
-	\begin{thebibliography}{9}
-		\bibitem{Karp1972} Karp, R. M. (1972). Reducibility among combinatorial problems. In \textit{Complexity of Computer Computations} (pp. 85–103). Springer.
-		\bibitem{Garey1979} Garey, M. R., \& Johnson, D. S. (1979). \textit{Computers and Intractability: A Guide to la Teoría de NP-Completeness}. W.H. Freeman.
-		\bibitem{Erdos1959} Erdős, P., \& Rényi, A. (1959). On random graphs. \textit{Publicationes Mathematicae}, 6, 290–297.
-		\bibitem{Prufer1918} Prüfer, H. (1918). Neuer Beweis eines Satzes über Permutationen. \textit{Archiv der Mathematik und Physik}, 27, 742–744.
-		\bibitem{Penrose2003} Penrose, M. (2003). \textit{Random Geometric Graphs}. Oxford University Press.
-		\bibitem{Glover1997} Glover, F., \& Laguna, M. (1997). \textit{Tabu Search}. Kluwer Academic Publishers.
-		\bibitem{Aarts2003} Aarts, E., \& Lenstra, J. K. (Eds.). (2003). \textit{Local Search in Combinatorial Optimization}. Princeton University Press.
-		\bibitem{Galinier2006} Galinier, P., \& Hertz, A. (2006). A survey of local search methods for graph coloring. \textit{Computers \& Operations Research}, 33(9), 2547–2562.
-		\bibitem{Cormen2009} Cormen, T. H., Leiserson, C. E., Rivest, R. L., \& Stein, C. (2009). \textit{Introduction to Algorithms} (3rd ed.). MIT Press.
-		\bibitem{Hale1980} Hale, W. K. (1980). Frequency assignment: Theory and applications. \textit{Proceedings of the IEEE}, 68(12), 1497–1514.
-	\end{thebibliography}
-	
+\end{enumerate}
+
+En mi opinión, un hallazgo particularmente relevante para la práctica es que, aunque el greedy tiene una cota de aproximación teórica pesimista ($O(\Delta)$), en la práctica su rendimiento es mucho mejor, especialmente cuando se complementa con búsqueda local. Esto es algo que he observado en otros problemas de optimización combinatoria: el análisis del peor caso a veces esconde un comportamiento promedio bastante más favorable.
+
+\subsection{Trabajo Futuro}
+
+Este proyecto abre varias líneas de investigación interesantes:
+\begin{itemize}
+	\item \textbf{Otras Metaheurísticas:} Explorar el desempeño de algoritmos genéticos, recocido simulado o colonias de hormigas en este problema.
+	\item \textbf{Cotas de Aproximación más Estrechas:} Investigar si para clases restringidas de grafos (planos, de grado acotado) se pueden diseñar algoritmos de aproximación con factor constante garantizado.
+	\item \textbf{Modelos más Realistas:} Incorporar interferencia co-canal y adyacente, múltiples antenas por torre, o costos dinámicos que dependan del patrón de tráfico.
+	\item \textbf{Optimización de Hiperparámetros:} Realizar un estudio sistemático para ajustar los parámetros de la búsqueda tabú (tamaño de lista, criterio de aspiración) en función del tipo de instancia.
+\end{itemize}
+
+\subsection{Reflexión Final}
+
+El problema AFCM es un ejemplo paradigmático de cómo un desafío industrial concreto—optimizar costos en una red de telecomunicaciones—se transforma en un problema abstracto de teoría de grafos y optimización combinatoria, revelando su inherente complejidad computacional (NP-completitud). Sin embargo, esta complejidad no es una barrera infranqueable. Mediante una combinación inteligente de teoría (análisis de complejidad, diseño de algoritmos exactos para casos especiales) y práctica (implementación de heurísticas eficientes, evaluación experimental rigurosa), es posible desarrollar soluciones viables y de alta calidad.
+
+Este ciclo de modelación, análisis teórico, diseño algorítmico y validación empírica constituye, a mi juicio, la esencia misma de la Ciencia de la Computación aplicada. El presente trabajo no solo aporta soluciones concretas a un problema específico, sino que también ilustra la metodología necesaria para enfrentar una amplia gama de problemas de optimización en ingeniería.
+
+\begin{thebibliography}{9}
+	\bibitem{Karp1972} Karp, R. M. (1972). Reducibility among combinatorial problems. In \textit{Complexity of Computer Computations} (pp. 85–103). Springer.
+	\bibitem{Garey1979} Garey, M. R., \& Johnson, D. S. (1979). \textit{Computers and Intractability: A Guide to la Teoría de NP-Completeness}. W.H. Freeman.
+	\bibitem{Erdos1959} Erdős, P., \& Rényi, A. (1959). On random graphs. \textit{Publicationes Mathematicae}, 6, 290–297.
+	\bibitem{Prufer1918} Prüfer, H. (1918). Neuer Beweis eines Satzes über Permutationen. \textit{Archiv der Mathematik und Physik}, 27, 742–744.
+	\bibitem{Penrose2003} Penrose, M. (2003). \textit{Random Geometric Graphs}. Oxford University Press.
+	\bibitem{Glover1997} Glover, F., \& Laguna, M. (1997). \textit{Tabu Search}. Kluwer Academic Publishers.
+	\bibitem{Aarts2003} Aarts, E., \& Lenstra, J. K. (Eds.). (2003). \textit{Local Search in Combinatorial Optimization}. Princeton University Press.
+	\bibitem{Galinier2006} Galinier, P., \& Hertz, A. (2006). A survey of local search methods for graph coloring. \textit{Computers \& Operations Research}, 33(9), 2547–2562.
+	\bibitem{Cormen2009} Cormen, T. H., Leiserson, C. E., Rivest, R. L., \& Stein, C. (2009). \textit{Introduction to Algorithms} (3rd ed.). MIT Press.
+	\bibitem{Hale1980} Hale, W. K. (1980). Frequency assignment: Theory and applications. \textit{Proceedings of the IEEE}, 68(12), 1497–1514.
+\end{thebibliography}
+
 \end{document}
